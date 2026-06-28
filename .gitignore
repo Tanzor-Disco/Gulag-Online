@@ -1,0 +1,4 @@
+__pycache__/
+putin_venv/
+backend/test.py
+.env
