@@ -63,7 +63,6 @@ let postManager = {
 			console.error("Observer is not initialized");
 			return []
 		} 
-		console.log(entries);
                                                   
 		let obs_obj = entries[0].target;
 		this.observer.unobserve(obs_obj);
@@ -79,7 +78,8 @@ let postManager = {
 		for (const [post_idx,post] of posts.entries()) {
 			const half = Math.floor(posts.length/2);
 			const isObserved = post_idx == half;
-			this.createPost(post.author,post.post_content,post.post_date,isObserved);
+			const convDate = new Date(post.post_date).toLocaleDateString('ru-RU');
+			this.createPost(post.author,post.post_content,convDate,isObserved);
 		}
 
 		this.observerCounter+=1;
