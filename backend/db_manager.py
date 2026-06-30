@@ -9,6 +9,7 @@ URI = os.environ.get("URI")
 if not URI:
     raise ValueError("URI is not set")
 
+SECTION_SIZE = 20
 
 class DBManager:
     def __init__(self, pool):
@@ -71,19 +72,27 @@ class DBManager:
             DELETE FROM posts
             """)
 
-    async def export(self):
+    async def export(self,section_num):
+        offset = SECTION_SIZE * section_num
+
         async with self.pool.acquire() as con:
             rows = await con.fetch("""
             SELECT * FROM posts
-            """)
+            ORDER BY post_date DESC
+            LIMIT $1
+            OFFSET $2
+            """,
+            SECTION_SIZE,offset)
         return [dict(row) for row in rows]
 
 
 async def main():
     test = await DBManager.connect()
-    await test._create_table()
-    res = await test.export()
-    print(res)
+    async with test.pool.acquire() as con:
+        amount = 2
+        skip = 2
+        rows = await con.fetch("SELECT * FROM posts LIMIT $2 OFFSET $1",skip,amount)
+        print(rows)
 
 
 if __name__ == "__main__":

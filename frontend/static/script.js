@@ -3,18 +3,25 @@
 const FETCH_ADDRESS = "/api/data";
 
 let postManager = {
-	
-	async fetchData(address=FETCH_ADDRESS) {
+	postCounter:0,
+	observerCounter:0,
+	observer:null,
+
+	async fetchData() {
+		const address = `${FETCH_ADDRESS}/?section=${this.observerCounter}`
 		const response = await fetch(address);
 		let posts = await response.json();
 		return posts;
 	},
 
-	createPost(author,postContent,postDate){
+	createPost(author,postContent,postDate,isObserved) {
 		const pageCenter = document.querySelector("div.center-style");
 		const newPost = document.createElement("article");
 		newPost.className = "center-post";
-		
+		newPost.setAttribute("number",this.postCounter);
+		this.postCounter+=1;
+
+				
 		let imageName = null;
 		switch (author) {
 			case "Вячеслав Володин":
@@ -45,16 +52,59 @@ let postManager = {
 			<p>${postContent}</p>
 		`	
 		pageCenter.append(newPost);
+
+		if (isObserved) {
+			this.observer.observe(newPost);
+		}
+	},
+	
+	async getPosts (entries) {
+		if (this.observer === null) {
+			console.error("Observer is not initialized");
+			return []
+		} 
+		console.log(entries);
+                                                  
+		let obs_obj = entries[0].target;
+		this.observer.unobserve(obs_obj);
+														  
+		const posts = await this.fetchData();
+		return posts;
 	},
 
-	async renderAll() {
-		const posts = await this.fetchData();
-		for (let post of posts) {
-			this.createPost(post.author,post.post_content,post.post_date);
+	async renderPosts(entries) {
+		if (!entries[0].isIntersecting) return // callback can be called with a tag not intersecting the viewport
+
+		const posts = await this.getPosts(entries);
+		for (const [post_idx,post] of posts.entries()) {
+			const half = Math.floor(posts.length/2);
+			const isObserved = post_idx == half;
+			this.createPost(post.author,post.post_content,post.post_date,isObserved);
 		}
-				
+
+		this.observerCounter+=1;
+	},
+
+	startObserving(tag) {
+		if (this.observer === null) {
+			console.error("Observer is not initialized");
+			return 
+		} 
+		this.observer.observe(tag);
 	}
 
 }
 
-postManager.renderAll();
+
+const observer_options = {
+	root:null,
+	rootMargin: "0px",
+	scrollMargin: "0px",
+	threshold: 1.0,
+};
+
+postManager.observer = new IntersectionObserver(postManager.renderPosts.bind(postManager),observer_options);
+const firstObserved = document.querySelector("div.page-center");
+postManager.startObserving(firstObserved);
+
+

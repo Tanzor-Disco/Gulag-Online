@@ -47,9 +47,9 @@ def root():
 
 
 @app.get("/api/data")
-async def export_data():
+async def export_data(section:int = 0):
     db_manager = app.state.db
-    data = await db_manager.export()
+    data = await db_manager.export(section)
     return data
 
 

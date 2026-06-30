@@ -2,3 +2,6 @@ __pycache__/
 putin_venv/
 backend/test.py
 .env
+frontend/node_modules/
+package-lock.json
+package.json
