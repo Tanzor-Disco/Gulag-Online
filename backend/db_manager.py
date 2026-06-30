@@ -17,7 +17,7 @@ class DBManager:
 
     @classmethod
     async def connect(cls):
-        pool = await asyncpg.create_pool(URI)
+        pool = await asyncpg.create_pool(URI,statement_cache_size=0)
         return cls(pool)
 
     async def _create_table(self):
@@ -88,12 +88,7 @@ class DBManager:
 
 async def main():
     test = await DBManager.connect()
-    async with test.pool.acquire() as con:
-        amount = 2
-        skip = 2
-        rows = await con.fetch("SELECT * FROM posts LIMIT $2 OFFSET $1",skip,amount)
-        print(rows)
-
+    await test._create_table()
 
 if __name__ == "__main__":
     asyncio.run(main())
