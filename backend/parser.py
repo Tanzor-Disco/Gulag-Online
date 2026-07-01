@@ -13,7 +13,6 @@ TELEGRAM_CHANNELS = [
 class TelegramParser:
     def __init__(self):
         self.subjects_list = TELEGRAM_CHANNELS
-        self.curr_subject_idx = 0
 
     def _get_soup(self, telegram_url):
         request = requests.get(telegram_url)
@@ -46,27 +45,27 @@ class TelegramParser:
         return date
 
     def get_parsed_data(self):
-        subject_url = self.subjects_list[self.curr_subject_idx]
-        soup = self._get_soup(subject_url)
-
         parsed_data = []
-        author_name = self._get_author_name(subject_url)
 
-        post_tags = soup.select("div.tgme_widget_message.text_not_supported_wrap.js-widget_message")
-        for tag in post_tags:
-            text = self._get_post_text(tag)
-            if text is None:
-                continue
+        for subject_url in self.subjects_list:
+            soup = self._get_soup(subject_url)
+            author_name = self._get_author_name(subject_url)
 
-            date = self._get_post_date(tag)
-            post_id = self._get_post_id(tag)
-            post_dict = {"id": post_id, "date": date, "author": author_name, "text": text}
-            parsed_data.append(post_dict)
+            post_tags = soup.select("div.tgme_widget_message.text_not_supported_wrap.js-widget_message")
+            for tag in post_tags:
+                text = self._get_post_text(tag)
+                if text is None:
+                    continue
+                date = self._get_post_date(tag)
+                post_id = self._get_post_id(tag)
+                post_dict = {"id": post_id, "date": date, "author": author_name, "text": text}
+                parsed_data.append(post_dict)
+                
+        if not parsed_data:
+            print("A parsing error occured")
 
-        # switching the subject to diversify the content
-        self.curr_subject_idx = (self.curr_subject_idx + 1) % len(self.subjects_list)
         return parsed_data
-
+    
 
 if __name__ == "__main__":
     test = TelegramParser()
