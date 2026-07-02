@@ -36,6 +36,10 @@ let postManager = {
 				imageName = "simonan.jpeg"
 				break;
 
+			case "Александр Дугин":
+				imageName = "dugin.jpg"
+				break;
+
 			default:
 				console.warn(`None of the images matched ${author}`);
 		}

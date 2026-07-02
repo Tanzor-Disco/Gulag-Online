@@ -7,6 +7,7 @@ TELEGRAM_CHANNELS = [
     "https://t.me/s/vv_volodin",
     "https://t.me/s/medvedev_telegram",
     "https://t.me/s/margaritasimonyan",
+    "https://t.me/s/Agdchan"
 ]
 
 
@@ -24,6 +25,10 @@ class TelegramParser:
         author_tag = soup.find("a", class_="tgme_widget_message_owner_name")
         assert author_tag is not None
         author_name = author_tag.get_text()
+
+        if author_name == "AGDchan":
+            author_name = "Александр Дугин"
+
         return author_name
 
     def _get_post_id(self, tag):
