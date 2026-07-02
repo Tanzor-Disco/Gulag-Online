@@ -1,0 +1,11 @@
+name: Periodically fetch news
+on:
+  schedule:
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger fetch endpoint
+        run: curl "https://gulag-online.onrender.com/api/fetch?fetch_param=${{secrets.FETCH_SECRET}}"
